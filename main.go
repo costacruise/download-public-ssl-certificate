@@ -7,6 +7,7 @@ import (
 	"flag"
 	"fmt"
 	"go/format"
+	"log"
 	"os"
 	"strings"
 	"text/template"
@@ -16,7 +17,12 @@ func fetchCerts(endpoints ...string) (string, error) {
 	out := bytes.Buffer{}
 
 	for _, endpoint := range endpoints {
-		conn, err := tls.Dial("tcp", endpoint+":443", &tls.Config{})
+		parts := strings.Split(endpoint, ":")
+		if len(parts) == 1 {
+			endpoint = endpoint + ":443"
+		}
+		log.Printf("Fetching certs for %q\n", endpoint)
+		conn, err := tls.Dial("tcp", endpoint, &tls.Config{})
 		if err != nil {
 			return "", fmt.Errorf("failed to connect: " + err.Error())
 		}
